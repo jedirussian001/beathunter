@@ -5,40 +5,15 @@ PlayerObject PLAYER;
 Terrain[] TERRAIN_LIST;
 
 void setup() {
-	float aux = 0, startPos;
-	int unitsAboveFifty;
-
 	size(400, 400);
 	frameRate(30);
-
-	TERRAIN_LIST = new Terrain[10];
-	TERRAIN_LIST[0] = new LandSection(50, 0);
-	println("0:" + TERRAIN_LIST[0].getHeight());
-	for(int i = 1; i < TERRAIN_LIST.length; i++) {
-		startPos = TERRAIN_LIST[i - 1].getEndPosition();
-
-		if(round(random(1)) == 0 && TERRAIN_LIST[i - 1].getHeight() != 0) {
-			TERRAIN_LIST[i] = new Pit(startPos);
-		} else {
-			unitsAboveFifty = int((aux - 50) / 25);
-
-			if(TERRAIN_LIST[i - 1].getHeight() == 0) {
-				aux = TERRAIN_LIST[i - 2].getHeight() + (round(random(-min(unitsAboveFifty, 3), 3)) * 25);
-			} else {
-				aux = TERRAIN_LIST[i - 1].getHeight() + (round(random(-min(unitsAboveFifty, 5), 5)) * 25);
-			}
-
-			TERRAIN_LIST[i] = new LandSection(aux, startPos);
-		}
-
-		println(i+": "+TERRAIN_LIST[i].getHeight());
-	}
-
-	PLAYER = new PlayerObject(width / 2, 50);
 
 	MechanicsManager manager = new MechanicsManager();
 
 	ENGINE = new GameEngine(2, manager);
+	ENGINE.generateWorld(10);
+
+	PLAYER = new PlayerObject(width / 2, 50);
 
 	ENGINE.addObject(PLAYER);
 	ENGINE.addObject(new EllipseObject(color(0, 0, 150), 350, 50, 25));
@@ -624,7 +599,6 @@ class Quicksand extends Terrain {
 
 			rectMode(CORNER);
 			fill(0);
-			stroke(255);
 			rect(realStartPos, height - this.getHeight(), realWidth, this.getHeight());
 		}
 	}
@@ -636,7 +610,7 @@ class Quicksand extends Terrain {
 	float interactWithObject(GameObject obj, float y) {
 		obj.setSpeedY(0);
 
-		return obj.getCenter().getY() + 5;
+		return obj.getCenter().getY() + 3;
 	}
 };
 
@@ -655,6 +629,47 @@ class GameEngine {
 
 	MechanicsManager getManager() {
 		return this.gameMechanicsManager;
+	}
+
+	void generateWorld(int numSections) {
+		float aux = 0, startPos;
+		int previousIndex;
+
+		TERRAIN_LIST = new Terrain[numSections];
+
+		TERRAIN_LIST[0] = new LandSection(50, 0);
+
+		for(int i = 1; i < TERRAIN_LIST.length; i++) {
+			startPos = TERRAIN_LIST[i - 1].getEndPosition();
+
+			if(round(random(1)) == 0 && TERRAIN_LIST[i - 1].getMinimumHeight() != 0) {
+				if(round(random(1)) == 0) {
+					TERRAIN_LIST[i] = new Pit(startPos);
+				} else {
+					if(TERRAIN_LIST.length - i > 1) {
+						TERRAIN_LIST[i + 1] = this.generateSolidTerrain(TERRAIN_LIST[i - 1].getHeight(), startPos + PIT_WIDTH);
+						TERRAIN_LIST[i] = 
+							new Quicksand(min(TERRAIN_LIST[i - 1].getHeight(), TERRAIN_LIST[i + 1].getHeight()), startPos);
+						i++;
+					} else {
+						TERRAIN_LIST[i] = new Quicksand(TERRAIN_LIST[i - 1].getHeight(), startPos);
+					}
+				}
+			} else {
+				previousIndex = i - ((TERRAIN_LIST[i - 1].getHeight() == 0) ? 2 : 1);
+
+				TERRAIN_LIST[i] = this.generateSolidTerrain(TERRAIN_LIST[previousIndex].getHeight(), startPos);
+			}
+		}
+	}
+
+	Terrain generateSolidTerrain(float previousHeight, float startingPosition) {
+		int unitsAboveFifty = int((previousHeight - 50) / 25);
+		float newHeight;
+
+		newHeight = previousHeight + (round(random(-min(unitsAboveFifty, 3), 3)) * 25);
+
+		return new LandSection(newHeight, startingPosition);
 	}
 
 	void processObjects() {
@@ -704,7 +719,7 @@ class GameEngine {
 
 	void renderTerrain() {
 		int startIndex = max(0, PLAYER.getCurrentTerrainIndex() - 1),
-			endIndex = min(TERRAIN_LIST.length, PLAYER.getCurrentTerrainIndex() + 1);
+			endIndex = min(TERRAIN_LIST.length - 1, PLAYER.getCurrentTerrainIndex() + 1);
 
 		for(int i = startIndex; i <= endIndex; i++) {
 			TERRAIN_LIST[i].render();
