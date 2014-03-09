@@ -194,9 +194,27 @@ abstract class GameObject {
 	}
 
 	void moveInYAxis(float amount) {
-		int startIndex, endIndex;
 		float newY = this.getCenter().getY() + amount,
 				groundHeight, maxY;
+		Terrain highestTerrain = this.getHighestTerrainBelow();
+
+		groundHeight = height - highestTerrain.getHeight();
+		
+		maxY = groundHeight - this.centerToBottom();
+
+		if(newY > maxY) {
+			newY = highestTerrain.interactWithObject(this, newY);
+		}
+
+		if(newY >= height) {
+			ENGINE.getManager().handleObjectFall(this);
+		}
+
+		this.getCenter().setY(newY);
+	}
+
+	Terrain getHighestTerrainBelow() {
+		int startIndex, endIndex;
 		Terrain highestTerrain;
 
 		startIndex = endIndex = this.currentTerrainIndex;
@@ -217,19 +235,7 @@ abstract class GameObject {
 			}
 		}
 
-		groundHeight = height - highestTerrain.getHeight();
-		
-		maxY = groundHeight - this.centerToBottom();
-
-		if(newY > maxY) {
-			newY = highestTerrain.interactWithObject(this, newY);
-		}
-
-		if(newY >= height) {
-			ENGINE.getManager().handleObjectFall(this);
-		}
-
-		this.getCenter().setY(newY);
+		return highestTerrain;
 	}
 
 	float getSpeedX() {
@@ -376,13 +382,13 @@ class PlayerObject extends GameObject {
 	float screenXPosition;
 	float xPosition;
 	int meleeAttackStage;
-	int jumpsAllowed;
+	boolean canAirJump;
 
 	PlayerObject(float x, float y) {
 		super(x, y);
 		this.hitbox = new Rectangle(this.getCenter(), 100, 100);
 		this.meleeAttackStage = 0;
-		this.jumpsAllowed = 0;
+		this.canAirJump = true;
 
 		float maxPositionX = TERRAIN_LIST[TERRAIN_LIST.length - 1].getEndPosition();
 
@@ -476,16 +482,30 @@ class PlayerObject extends GameObject {
 		this.meleeAttackStage = 4;
 	}
 
-	void jump() {
-		if(this.jumpsAllowed > 0) {
-			this.setSpeedY(-(sqrt(2 * (GRAVITY / frameRate) * 150)));
+	boolean isStanding() {
+		Terrain highestTerrain = this.getHighestTerrainBelow();
 
-			this.jumpsAllowed--;
+		return highestTerrain.isSolid() && (height - this.center.getY() - this.centerToBottom()) == highestTerrain.getHeight();
+	}
+
+	void jump() {
+		boolean willJump = true;
+
+		if(!this.isStanding()) {
+			if(this.canAirJump) {
+				this.canAirJump = false;
+			} else {
+				willJump = false;
+			}
+		}
+
+		if(willJump) {
+			this.setSpeedY(-(sqrt(2 * (GRAVITY / frameRate) * 150)));
 		}
 	}
 
 	void resetJumps() {
-		this.jumpsAllowed = 2;
+		this.canAirJump = true;
 	}
 };
 
@@ -494,10 +514,12 @@ class PlayerObject extends GameObject {
 abstract class Terrain {
 	Point startPoint;
 	float tWidth;
+	boolean solidness;
 
-	Terrain(float x, float y, float w) {
+	Terrain(float x, float y, float w, boolean solidness) {
 		this.startPoint = new Point(x, y);
 		this.tWidth = w;
+		this.solidness = solidness;
 	}
 
 	Point getStartPoint() {
@@ -524,6 +546,10 @@ abstract class Terrain {
 		return this.getStartingPosition() + this.tWidth;
 	}
 
+	boolean isSolid() {
+		return this.solidness;
+	}
+
 	abstract void render();
 	abstract float interactWithObject(GameObject obj, float y);
 };
@@ -531,7 +557,7 @@ abstract class Terrain {
 
 class LandSection extends Terrain {
 	LandSection(float h, float pos) {
-		super(pos, h, TERRAIN_WIDTH);
+		super(pos, h, TERRAIN_WIDTH, true);
 	}
 
 	void render() {
@@ -568,7 +594,7 @@ class LandSection extends Terrain {
 
 class Pit extends Terrain {
 	Pit(float pos) {
-		super(pos, 0, PIT_WIDTH);
+		super(pos, 0, PIT_WIDTH, false);
 	}
 
 	void render() {}
@@ -580,7 +606,7 @@ class Pit extends Terrain {
 
 class Quicksand extends Terrain {
 	Quicksand(float h, float pos) {
-		super(pos, h, PIT_WIDTH);
+		super(pos, h, PIT_WIDTH, false);
 	}
 
 	void render() {
@@ -608,9 +634,21 @@ class Quicksand extends Terrain {
 	}
 
 	float interactWithObject(GameObject obj, float y) {
-		obj.setSpeedY(0);
+		float spY = min(0, obj.getSpeedY()), realHeight = height - this.getHeight() - obj.centerToBottom();
+		Point objCenter = obj.getCenter();
 
-		return obj.getCenter().getY() + 3;
+		println("spY: "+spY);
+		obj.setSpeedY(spY);
+
+		if(spY == 0) {
+			if(objCenter.getY() < realHeight) {
+				return realHeight;
+			} else {
+				return objCenter.getY() + 3;
+			}
+		} else {
+			return y;
+		}
 	}
 };
 
