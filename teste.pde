@@ -5,7 +5,7 @@ PlayerObject PLAYER;
 Terrain[] TERRAIN_LIST;
 
 void setup() {
-	size(400, 400);
+	size(700, 400);
 	frameRate(30);
 
 	MechanicsManager manager = new MechanicsManager();
@@ -13,7 +13,7 @@ void setup() {
 	ENGINE = new GameEngine(2, manager);
 	ENGINE.generateWorld(10);
 
-	PLAYER = new PlayerObject(width / 2, 50);
+	PLAYER = new PlayerObject(200, 50);
 
 	ENGINE.addObject(PLAYER);
 	ENGINE.addObject(new EllipseObject(color(0, 0, 150), 350, 50, 25));
@@ -756,8 +756,19 @@ class GameEngine {
 	}
 
 	void renderTerrain() {
-		int startIndex = max(0, PLAYER.getCurrentTerrainIndex() - 1),
-			endIndex = min(TERRAIN_LIST.length - 1, PLAYER.getCurrentTerrainIndex() + 1);
+		float leftScreenEdge = PLAYER.getXPosition() - PLAYER.getScreenXPosition(),
+				rightScreenEdge = leftScreenEdge + width;
+
+		int startIndex = PLAYER.getCurrentTerrainIndex(), 
+			endIndex = PLAYER.getCurrentTerrainIndex();
+
+		println("startIndex: "+startIndex);
+
+		println("endIndex: "+endIndex);
+
+		while(startIndex > 0 && TERRAIN_LIST[startIndex].getEndPosition() > leftScreenEdge) startIndex--;
+
+		while(endIndex + 1 < TERRAIN_LIST.length && TERRAIN_LIST[endIndex].getStartingPosition() < rightScreenEdge) endIndex++;
 
 		for(int i = startIndex; i <= endIndex; i++) {
 			TERRAIN_LIST[i].render();
