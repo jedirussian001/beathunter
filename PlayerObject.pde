@@ -9,9 +9,23 @@ class PlayerObject extends GameObject {
 	float xPosition;
 	int meleeAttackStage;
 	boolean canAirJump;
+	VisualState[] visualStates;
+	int STANDING = 0, WALK = 1, JUMP = 2, ATTACK = 3;
+	int currentState;
 
 	PlayerObject(float x, float y) {
 		super(x, y);
+
+		/* UNTIL I FIND A BETTER PLACE FOR THESE VARIABLES, THIS STAYS HERE! */
+		// variables for the image counting of the animation;
+		int walkingFrames = 35, jumpingFrames, attackFrames;
+
+		this.visualStates = new VisualState[4];
+		this.visualStates[STANDING] = new SingleSprite("standing.png");
+		this.visualStates[WALK] = new Animation("walk", walkingFrames);
+
+		this.currentState = STANDING;
+
 		this.hitbox = new Rectangle(this.getCenter(), 100, 100);
 		this.meleeAttackStage = 0;
 		this.canAirJump = true;
@@ -58,10 +72,12 @@ class PlayerObject extends GameObject {
 	}
 
 	void render() {
-		fill(128);
+		/*fill(128);
 		noStroke();
 		rectMode(CENTER);
-		rect(this.getScreenXPosition(), this.getCenter().getY(), 100, 100);
+		rect(this.getScreenXPosition(), this.getCenter().getY(), 100, 100);*/
+
+		this.visualStates[this.currentState].draw(this.getScreenXPosition(), this.getCenter().getY());
 
 		if(this.meleeAttackStage > 0) {
 			float startingAngle = PI + HALF_PI;
@@ -85,15 +101,15 @@ class PlayerObject extends GameObject {
 	}
 
 	float centerToBottom() {
-		return 50;
+		return 75;
 	}
 
 	float centerToLeft() {
-		return 50;
+		return 75;
 	}
 
 	float centerToRight() {
-		return 50;
+		return 75;
 	}
 
 	float getScreenXPosition() {
@@ -132,5 +148,26 @@ class PlayerObject extends GameObject {
 
 	void resetJumps() {
 		this.canAirJump = true;
+	}
+
+	void interactWithKeyPressed(int keyCode) {
+		if(keyCode == 39) { // right arrow
+			this.setSpeedX(max(5, this.getSpeedX()));
+			this.currentState = WALK;
+		} else if(keyCode == 37) { // left arrow
+			this.setSpeedX(min(-5, this.getSpeedX()));
+			this.currentState = WALK;
+		} else if(keyCode == 32) { // space
+			this.jump();
+		} else if(keyCode == 81){
+			this.doMeleeAttack();
+		}
+	}
+
+	void interactWithKeyReleased(int keyCode) {
+		if((keyCode == 39 || keyCode == 37)) { // left or right arrow
+			PLAYER.setSpeedX(0);
+			this.currentState = STANDING;
+		}
 	}
 };

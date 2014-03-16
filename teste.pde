@@ -25,20 +25,10 @@ void draw() {
 }
 
 void keyPressed() {
-	if(keyCode == 39) { // right arrow
-		PLAYER.setSpeedX(max(5, PLAYER.getSpeedX()));
-	} else if(keyCode == 37) { // left arrow
-		PLAYER.setSpeedX(min(-5, PLAYER.getSpeedX()));
-	} else if(keyCode == 32) { // space
-		PLAYER.jump();
-	} else if(keyCode == 81){
-		PLAYER.doMeleeAttack();
-	}
+	PLAYER.interactWithKeyPressed(keyCode);
 }
 
 void keyReleased() {
-	if((keyCode == 39 || keyCode == 37)) { // left or right arrow
-		PLAYER.setSpeedX(0);
-	}
+	PLAYER.interactWithKeyReleased(keyCode);
 }
 
