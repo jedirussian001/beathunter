@@ -42,18 +42,6 @@ class RectangleObject extends ColouredObject {
 		rect(PLAYER.getScreenXPosition() + (this.getXPosition() - PLAYER.getXPosition()), 
 				this.getCenter().getY(), this.objWidth, this.objHeight);
 	}
-
-	float centerToBottom() {
-		return (this.objHeight / 2);
-	}
-
-	float centerToLeft() {
-		return (this.objWidth / 2);
-	}
-
-	float centerToRight() {
-		return (this.objWidth / 2);
-	}
 };
 
 class EllipseObject extends ColouredObject {
@@ -80,17 +68,5 @@ class EllipseObject extends ColouredObject {
 		ellipseMode(RADIUS);
 		ellipse(PLAYER.getScreenXPosition() + (this.getXPosition() - PLAYER.getXPosition()), 
 				this.getCenter().getY(), this.radiusX, this.radiusY);
-	}
-
-	float centerToBottom() {
-		return this.radiusY;
-	}
-
-	float centerToLeft() {
-		return this.radiusX;
-	}
-
-	float centerToRight() {
-		return this.radiusX;
 	}
 };

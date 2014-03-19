@@ -26,7 +26,7 @@ class PlayerObject extends GameObject {
 
 		this.currentState = STANDING;
 
-		this.hitbox = new Rectangle(this.getCenter(), 100, 100);
+		this.hitbox = new Rectangle(this.getCenter(), 150, 150);
 		this.meleeAttackStage = 0;
 		this.canAirJump = true;
 
@@ -78,6 +78,10 @@ class PlayerObject extends GameObject {
 		rect(this.getScreenXPosition(), this.getCenter().getY(), 100, 100);*/
 
 		this.visualStates[this.currentState].draw(this.getScreenXPosition(), this.getCenter().getY());
+		stroke(0);
+		noFill();
+		rectMode(CENTER);
+		rect(this.getScreenXPosition(), this.getCenter().getY(), 150, 149);
 
 		if(this.meleeAttackStage > 0) {
 			float startingAngle = PI + HALF_PI;
@@ -98,18 +102,6 @@ class PlayerObject extends GameObject {
 
 	void setXPosition(float xPos) {
 		this.center.setX(xPos);
-	}
-
-	float centerToBottom() {
-		return 75;
-	}
-
-	float centerToLeft() {
-		return 75;
-	}
-
-	float centerToRight() {
-		return 75;
 	}
 
 	float getScreenXPosition() {

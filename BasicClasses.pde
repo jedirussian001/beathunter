@@ -239,9 +239,21 @@ abstract class GameObject {
 		return this.currentTerrainIndex;
 	}
 
-	abstract float centerToBottom();
-	abstract float centerToLeft();
-	abstract float centerToRight();
+	float centerToBottom() {
+		return this.getHitbox().getHeight() / 2;
+	}
+
+	float centerToLeft() {
+		return this.getHitbox().getWidth() / 2;
+	}
+	
+	float centerToRight() {
+		return this.getHitbox().getWidth() / 2;
+	}
+
+	float centerToTop() {
+		return this.getHitbox().getHeight() / 2;
+	}
 	abstract void render();
 };
 

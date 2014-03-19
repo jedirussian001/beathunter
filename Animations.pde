@@ -12,7 +12,8 @@
  	PImage img;
 
  	SingleSprite(String path) {
- 		this.img = loadImage(path);
+ 		this.img = loadImage("data/" + path);
+ 		// this.img = loadImage(path);
  	}
 
  	void draw(float x, float y) {
@@ -28,7 +29,8 @@
  	Animation(String imgFolder, int numImages) {
  		this.imgs = new PImage[numImages];
  		for(int i = 1 ; i <= numImages; i++) {
- 			this.imgs[i-1] = loadImage(imgFolder + "/" + i + ".png");
+ 			this.imgs[i-1] = loadImage("data/" + imgFolder + "/" + i + ".png");
+ 			// this.imgs[i-1] = loadImage(imgFolder + "/" + i + ".png");
  		}
  		this.stepCounter = 0;
  	}

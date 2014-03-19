@@ -11,7 +11,7 @@ void setup() {
 	ENGINE = new GameEngine(2);
 	ENGINE.generateWorld(10);
 
-	PLAYER = new PlayerObject(200, 50);
+	PLAYER = new PlayerObject(200, 100);
 
 	ENGINE.addObject(PLAYER);
 	ENGINE.addObject(new EllipseObject(color(0, 0, 150), 350, 50, 25));
