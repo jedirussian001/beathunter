@@ -1,5 +1,5 @@
 float GRAVITY = 30;
-int TERRAIN_WIDTH = 400, PIT_WIDTH = 200;
+int TERRAIN_WIDTH = 400, PIT_WIDTH = 200, LEVEL_LENGTH = 10;
 GameEngine ENGINE;
 PlayerObject PLAYER;
 Terrain[] TERRAIN_LIST;
@@ -9,7 +9,7 @@ void setup() {
 	frameRate(30);
 
 	ENGINE = new GameEngine(2);
-	ENGINE.generateWorld(10);
+	ENGINE.generateWorld(LEVEL_LENGTH);
 
 	PLAYER = new PlayerObject(200, 100);
 
