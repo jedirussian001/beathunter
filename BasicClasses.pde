@@ -62,6 +62,26 @@ class Rectangle {
 		return this.rHeight;
 	}
 
+	void render() {
+		stroke(0);
+		noFill();
+		rectMode(CENTER);
+
+		float psx = 0, px = 0, ox = 0, sx;
+
+		if(PLAYER != null) {
+			psx = PLAYER.getScreenXPosition();
+			px = PLAYER.getXPosition();
+			ox = PLAYER.getOffsetX();
+		}
+
+		sx = psx + (this.getCenter().getX() - (px + ox));
+
+		// rect(PLAYER.getScreenXPosition() - PLAYER.getOffsetX(), PLAYER.getScreenYPosition() - PLAYER.getOffsetY(), 
+		rect(sx, this.getCenter().getY(), 
+			this.getWidth(), this.getHeight());
+	}
+
 	boolean intersectsWith(Rectangle otherRectangle) {
 		float minimumXDifference = (this.rWidth / 2) + (otherRectangle.getWidth() / 2),
 				minimumYDifference = (this.rHeight / 2) + (otherRectangle.getHeight() / 2),
@@ -88,10 +108,14 @@ abstract class GameObject {
 	float speedY;
 	Rectangle hitbox;
 	int currentTerrainIndex;
+	float offsetX;
+	float offsetY;
 
-	GameObject(float x, float y) {
+	GameObject(float x, float y, float offX, float offY) {
 		float tw, xPos;
 
+		this.offsetX = offX;
+		this.offsetY = offY;
 		this.center = new Point(x, y);
 		this.affectedByGRAVITY = true;
 		this.enabled = true;
@@ -254,6 +278,39 @@ abstract class GameObject {
 	float centerToTop() {
 		return this.getHitbox().getHeight() / 2;
 	}
+
+	float getOffsetX() {
+		return this.offsetX;
+	}
+
+	void setOffsetX(float offX) {
+		this.offsetX = offX;
+	}
+
+	float getOffsetY() {
+		return this.offsetY;
+	}
+
+	void setOffsetY(float offY) {
+		this.offsetY = offY;
+	}
+
+	float getScreenXPosition() {
+		float psx = 0, px = 0, ox = 0;
+
+		if(PLAYER != null) {
+			psx = PLAYER.getScreenXPosition();
+			px = PLAYER.getXPosition();
+			ox = PLAYER.getOffsetX();
+		}
+
+		return psx + ((this.getXPosition() + this.getOffsetX()) - (px + ox));
+	}
+
+	float getScreenYPosition() {
+		return this.getCenter().getY() + this.getOffsetX();
+	}
+
 	abstract void render();
 };
 
@@ -304,6 +361,21 @@ abstract class Terrain {
 		return this.solidness;
 	}
 
-	abstract void render();
+	void calculatePositionThenRender(float leftScreenEdge) {
+		if(this.getEndPosition() > leftScreenEdge) {
+			float startingX = this.getStartingPosition(),
+					realStartPos = max(0, startingX - leftScreenEdge), realWidth;
+
+			if(PLAYER.getXPosition() > startingX) {
+				realWidth = min(this.getWidth(), this.getWidth() - (leftScreenEdge - startingX));
+			} else {
+				realWidth = min(this.getWidth(), (width + leftScreenEdge) - startingX);
+			}
+
+			this.render(realStartPos, height - this.getHeight(), realWidth);
+		}
+	}
+
+	abstract void render(float x, float y, float w);
 	abstract float interactWithObject(GameObject obj, float y);
 };

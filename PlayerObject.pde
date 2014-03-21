@@ -5,7 +5,6 @@
  */
 
 class PlayerObject extends GameObject {
-	float screenXPosition;
 	float xPosition;
 	int meleeAttackStage;
 	boolean canAirJump;
@@ -13,8 +12,8 @@ class PlayerObject extends GameObject {
 	int STANDING = 0, WALK = 1, JUMP = 2, ATTACK = 3;
 	int currentState;
 
-	PlayerObject(float x, float y) {
-		super(x, y);
+	PlayerObject(float x, float y, float offX, float offY, float hitW, float hitH) {
+		super(x, y, offX, offY);
 
 		/* UNTIL I FIND A BETTER PLACE FOR THESE VARIABLES, THIS STAYS HERE! */
 		// variables for the image counting of the animation;
@@ -26,19 +25,9 @@ class PlayerObject extends GameObject {
 
 		this.currentState = STANDING;
 
-		this.hitbox = new Rectangle(this.getCenter(), 150, 150);
+		this.hitbox = new Rectangle(this.getCenter(), hitW, hitH);
 		this.meleeAttackStage = 0;
 		this.canAirJump = true;
-
-		float maxPositionX = TERRAIN_LIST[TERRAIN_LIST.length - 1].getEndPosition();
-
-		if(x < width / 2) {
-			this.setScreenXPosition(max(this.centerToLeft(), x));
-		} else if(x > maxPositionX - (width / 2)) {
-			this.setScreenXPosition(min(width - this.centerToRight(), width - (maxPositionX - x)));
-		} else {
-			this.setScreenXPosition(width / 2);
-		}
 	}
 
 	void moveInXAxis(float amount) {
@@ -46,6 +35,7 @@ class PlayerObject extends GameObject {
 				maxPositionX = TERRAIN_LIST[TERRAIN_LIST.length - 1].getEndPosition(),
 				newXPos = min(maxPositionX - this.centerToRight(), max(this.centerToLeft(), this.getXPosition() + amount)),
 				currentYPos = height - (this.getCenter().getY() + this.centerToBottom());
+
 		int nextPlatformIndex = this.currentTerrainIndex;
 
 		if(amount < 0 && newXPos - this.centerToLeft() < TERRAIN_LIST[this.currentTerrainIndex].getStartingPosition()) {
@@ -55,12 +45,6 @@ class PlayerObject extends GameObject {
 		}
 
 		if(TERRAIN_LIST[nextPlatformIndex].getHeight() <= currentYPos) {
-			if(this.getXPosition() < middleScreen || this.getXPosition() + amount < middleScreen) {
-				this.setScreenXPosition(max(this.centerToLeft(), min(middleScreen, (this.getScreenXPosition() + amount))));
-			} else if(this.getXPosition() > maxPositionX - middleScreen || this.getXPosition() + amount > maxPositionX - middleScreen) {
-				this.setScreenXPosition(min(width - this.centerToRight(), max(middleScreen, (this.getScreenXPosition() + amount))));
-			}
-
 			this.setXPosition(newXPos);
 
 			if(amount > 0 && this.getXPosition() >= TERRAIN_LIST[this.currentTerrainIndex].getEndPosition()) {
@@ -77,18 +61,15 @@ class PlayerObject extends GameObject {
 		rectMode(CENTER);
 		rect(this.getScreenXPosition(), this.getCenter().getY(), 100, 100);*/
 
-		this.visualStates[this.currentState].draw(this.getScreenXPosition(), this.getCenter().getY());
-		stroke(0);
-		noFill();
-		rectMode(CENTER);
-		rect(this.getScreenXPosition(), this.getCenter().getY(), 150, 149);
+		this.visualStates[this.currentState].draw(this.getScreenXPosition(), this.getScreenYPosition());
+		this.getHitbox().render();
 
 		if(this.meleeAttackStage > 0) {
 			float startingAngle = PI + HALF_PI;
 
 			fill(255);
 			noStroke();
-			arc(this.getScreenXPosition(), this.getCenter().getY(), 100, 100, startingAngle, startingAngle + (HALF_PI / this.meleeAttackStage));
+			arc(this.getScreenXPosition(), this.getScreenYPosition(), 100, 100, startingAngle, startingAngle + (HALF_PI / this.meleeAttackStage));
 
 			//CHECK FOR COLLISION W/ MELEE ATTACK HERE
 
@@ -96,20 +77,21 @@ class PlayerObject extends GameObject {
 		}
 	}
 
-	float getXPosition() {
-		return this.center.getX();
-	}
-
-	void setXPosition(float xPos) {
-		this.center.setX(xPos);
-	}
-
 	float getScreenXPosition() {
-		return this.screenXPosition;
+		float px = this.getXPosition(), ox = this.getOffsetX(), spx = px + ox,
+				maxPx = TERRAIN_LIST[TERRAIN_LIST.length - 1].getEndPosition();
+
+		if(px < (width / 2) - ox) {
+			return spx;
+		} else if(spx > maxPx - (width / 2)) {
+			return min(width - this.centerToRight() + ox, width - (maxPx - spx));
+		} else {
+			return (width / 2);
+		}
 	}
 
-	void setScreenXPosition(float sxPos) {
-		this.screenXPosition = sxPos;
+	float getScreenYPosition() {
+		return this.getCenter().getY() + this.getOffsetY();
 	}
 
 	void doMeleeAttack() {

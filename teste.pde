@@ -5,13 +5,13 @@ PlayerObject PLAYER;
 Terrain[] TERRAIN_LIST;
 
 void setup() {
-	size(700, 400);
+	size(800, 450);
 	frameRate(30);
 
 	ENGINE = new GameEngine(2);
 	ENGINE.generateWorld(LEVEL_LENGTH);
 
-	PLAYER = new PlayerObject(200, 100);
+	PLAYER = new PlayerObject(200, 100, 35, 0, 80, 150);
 
 	ENGINE.addObject(PLAYER);
 	ENGINE.addObject(new EllipseObject(color(0, 0, 150), 350, 50, 25));

@@ -7,25 +7,11 @@ class LandSection extends Terrain {
 		super(pos, h, TERRAIN_WIDTH, true);
 	}
 
-	void render() {
-		float playerPos = PLAYER.getXPosition(), playerScreenPos = PLAYER.getScreenXPosition(),
-				playerPosDiff = playerPos - playerScreenPos;
-
-		if(this.getEndPosition() > playerPosDiff) {
-			Point stp = this.getStartPoint();
-			float posDiff = stp.getX() - playerPos, realStartPos = max(0, playerScreenPos + posDiff), realWidth;
-
-			if(playerPos > this.getStartingPosition()) {
-				realWidth = min(this.getWidth(), this.getWidth() - (playerPosDiff - this.getStartingPosition()));
-			} else {
-				realWidth = min(this.getWidth(), (width + playerPosDiff) - this.getStartingPosition());
-			}
-
-			rectMode(CORNER);
-			fill(180, 0, 0);
-			noStroke();
-			rect(realStartPos, height - this.getHeight(), realWidth, this.getHeight());
-		}
+	void render(float x, float y, float w) {
+		rectMode(CORNER);
+		fill(180, 0, 0);
+		noStroke();
+		rect(x, y, w, this.getHeight());
 	}
 
 	float interactWithObject(GameObject obj, float y) {
@@ -44,7 +30,9 @@ class Pit extends Terrain {
 		super(pos, 0, PIT_WIDTH, false);
 	}
 
-	void render() {}
+	void calculateThenRender() {}
+
+	void render(float x, float y, float w) {}
 
 	float interactWithObject(GameObject obj, float y) {
 		return y;
@@ -56,24 +44,11 @@ class Quicksand extends Terrain {
 		super(pos, h, PIT_WIDTH, false);
 	}
 
-	void render() {
-		float playerPos = PLAYER.getXPosition(), playerScreenPos = PLAYER.getScreenXPosition(),
-				playerPosDiff = playerPos - playerScreenPos;
-
-		if(this.getEndPosition() > playerPosDiff) {
-			Point stp = this.getStartPoint();
-			float posDiff = stp.getX() - playerPos, realStartPos = max(0, playerScreenPos + posDiff), realWidth;
-
-			if(playerPos > this.getStartingPosition()) {
-				realWidth = min(this.getWidth(), this.getWidth() - (playerPosDiff - this.getStartingPosition()));
-			} else {
-				realWidth = min(this.getWidth(), (width + playerPosDiff) - this.getStartingPosition());
-			}
-
-			rectMode(CORNER);
-			fill(0);
-			rect(realStartPos, height - this.getHeight(), realWidth, this.getHeight());
-		}
+	void render(float x, float y, float w) {
+		rectMode(CORNER);
+		fill(0);
+		noStroke();
+		rect(x, y, w, this.getHeight());
 	}
 
 	float getMinimumHeight() {

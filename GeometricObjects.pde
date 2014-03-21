@@ -7,7 +7,7 @@ abstract class ColouredObject extends GameObject {
 	color objColor;
 
 	ColouredObject(color objColor, float x, float y) {
-		super(x, y);
+		super(x, y, 0, 0);
 		this.objColor = objColor;
 	}
 
@@ -21,6 +21,7 @@ abstract class ColouredObject extends GameObject {
 
 	void render() {
 		fill(this.objColor);
+		noStroke();
 	}
 };
 
@@ -39,8 +40,7 @@ class RectangleObject extends ColouredObject {
 	void render() {
 		super.render();
 		rectMode(CENTER);
-		rect(PLAYER.getScreenXPosition() + (this.getXPosition() - PLAYER.getXPosition()), 
-				this.getCenter().getY(), this.objWidth, this.objHeight);
+		rect(this.getScreenXPosition(), this.getScreenYPosition(), this.objWidth, this.objHeight);
 	}
 };
 
@@ -66,7 +66,6 @@ class EllipseObject extends ColouredObject {
 	void render() {
 		super.render();
 		ellipseMode(RADIUS);
-		ellipse(PLAYER.getScreenXPosition() + (this.getXPosition() - PLAYER.getXPosition()), 
-				this.getCenter().getY(), this.radiusX, this.radiusY);
+		ellipse(this.getScreenXPosition(), this.getScreenYPosition(), this.radiusX, this.radiusY);
 	}
 };

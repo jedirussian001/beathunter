@@ -29,7 +29,7 @@ class GameEngine {
 		for(int i = 1; i < TERRAIN_LIST.length; i++) {
 			startPos = TERRAIN_LIST[i - 1].getEndPosition();
 
-			if(round(random(1)) == 0 && TERRAIN_LIST[i - 1].getMinimumHeight() != 0) {
+			if(round(random(1)) == 0 && TERRAIN_LIST[i - 1].getMinimumHeight() != 0 && numSections - i > 1) {
 				if(round(random(1)) == 0) {
 					TERRAIN_LIST[i] = new Pit(startPos);
 				} else {
@@ -105,7 +105,7 @@ class GameEngine {
 	}
 
 	void renderTerrain() {
-		float leftScreenEdge = PLAYER.getXPosition() - PLAYER.getScreenXPosition(),
+		float leftScreenEdge = PLAYER.getXPosition() - (PLAYER.getScreenXPosition() - PLAYER.getOffsetX()),
 				rightScreenEdge = leftScreenEdge + width;
 
 		int startIndex = PLAYER.getCurrentTerrainIndex(), 
@@ -116,7 +116,7 @@ class GameEngine {
 		while(endIndex + 1 < TERRAIN_LIST.length && TERRAIN_LIST[endIndex].getStartingPosition() < rightScreenEdge) endIndex++;
 
 		for(int i = startIndex; i <= endIndex; i++) {
-			TERRAIN_LIST[i].render();
+			TERRAIN_LIST[i].calculatePositionThenRender(leftScreenEdge);
 		}
 	}
 
