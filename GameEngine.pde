@@ -11,11 +11,13 @@
 
 class GameEngine {
 	GameObject[] objects;
+	BackgroundLayer[] layers;
 	int objCount, nextObj;
 
 	GameEngine(int maxSize) {
 		this.objects = new GameObject[maxSize];
 		this.objCount = this.nextObj = 0;
+		this.layers = new BackgroundLayer[0];
 	}
 
 	void generateWorld(int numSections) {
@@ -59,6 +61,10 @@ class GameEngine {
 		return new LandSection(newHeight, startingPosition);
 	}
 
+	void addBackgroundLayer(BackgroundLayer newLayer) {
+		this.layers = (BackgroundLayer[]) append(this.layers, newLayer);
+	}
+
 	void processObjects() {
 		GameObject currentObject, otherObject;
 		float currentGroundHeight;
@@ -100,8 +106,15 @@ class GameEngine {
 	}
 
 	void renderWorld() {
+		this.renderBackground();
 		this.renderTerrain();
 		this.renderObjects();
+	}
+
+	void renderBackground() {
+		for(int i = 0; i < this.layers.length; i++) {
+			this.layers[i].render();
+		}
 	}
 
 	void renderTerrain() {
@@ -143,7 +156,7 @@ class GameEngine {
 	}
 
 	void collisionOccurred(GameObject anObject, GameObject otherObject) {
-		background(random(0, 256));
+		
 	}
 
 	void handleObjectFall(GameObject obj) {
