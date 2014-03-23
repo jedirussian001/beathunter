@@ -107,8 +107,8 @@ class GameEngine {
 
 	void renderWorld() {
 		this.renderBackground();
-		this.renderTerrain();
 		this.renderObjects();
+		this.renderTerrain();
 	}
 
 	void renderBackground() {
@@ -161,7 +161,8 @@ class GameEngine {
 
 	void handleObjectFall(GameObject obj) {
 		if(obj == PLAYER) {
-			println("GAME OVER");
+			PLAYER.disable();
+			// call game over
 		} else {
 			obj.disable();
 		}

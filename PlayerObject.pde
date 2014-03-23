@@ -9,21 +9,20 @@ class PlayerObject extends GameObject {
 	int meleeAttackStage;
 	boolean canAirJump;
 	VisualState[] visualStates;
-	int STANDING = 0, WALK = 1, JUMP = 2, ATTACK = 3;
 	int currentState;
+	boolean isFacingLeft;
 
 	PlayerObject(float x, float y, float offX, float offY, float hitW, float hitH) {
 		super(x, y, offX, offY);
 
-		/* UNTIL I FIND A BETTER PLACE FOR THESE VARIABLES, THIS STAYS HERE! */
-		// variables for the image counting of the animation;
-		int walkingFrames = 35, jumpingFrames, attackFrames;
-
 		this.visualStates = new VisualState[4];
-		this.visualStates[STANDING] = new SingleSprite("standing.png");
-		this.visualStates[WALK] = new Animation("walk", walkingFrames);
+		this.visualStates[STANDING] = new SingleSprite("warrior/standing.png");
+		this.visualStates[WALK] = new Animation("warrior/walk", walkingFrames);
+		this.visualStates[JUMP] = new Animation("warrior/jump", jumpingFrames);
+		this.visualStates[ATTACK] = new Animation("warrior/hit", attackFrames);
 
 		this.currentState = STANDING;
+		this.isFacingLeft = false;
 
 		this.hitbox = new Rectangle(this.getCenter(), hitW, hitH);
 		this.meleeAttackStage = 0;
@@ -56,24 +55,23 @@ class PlayerObject extends GameObject {
 	}
 
 	void render() {
-		/*fill(128);
-		noStroke();
-		rectMode(CENTER);
-		rect(this.getScreenXPosition(), this.getCenter().getY(), 100, 100);*/
-
-		this.visualStates[this.currentState].draw(this.getScreenXPosition(), this.getScreenYPosition());
-		this.getHitbox().render();
+		pushMatrix();
+		translate(this.getScreenXPosition(), this.getScreenYPosition());
+		if(this.isFacingLeft) {
+			translate((-2) * this.getOffsetX(), 0);
+			scale(-1, 1);
+		}
+		this.visualStates[this.currentState].draw(0, 0);
+		popMatrix();
+		// this.getHitbox().render();
 
 		if(this.meleeAttackStage > 0) {
-			float startingAngle = PI + HALF_PI;
-
-			fill(255);
-			noStroke();
-			arc(this.getScreenXPosition(), this.getScreenYPosition(), 100, 100, startingAngle, startingAngle + (HALF_PI / this.meleeAttackStage));
-
 			//CHECK FOR COLLISION W/ MELEE ATTACK HERE
 
 			this.meleeAttackStage--;
+			if(this.meleeAttackStage == 0) {
+				this.currentState = STANDING;
+			}
 		}
 	}
 
@@ -95,7 +93,16 @@ class PlayerObject extends GameObject {
 	}
 
 	void doMeleeAttack() {
-		this.meleeAttackStage = 4;
+		this.meleeAttackStage = attackFrames;
+		this.currentState = ATTACK;
+	}
+
+	int getState() {
+		return this.currentState;
+	}
+
+	void setState(int state) {
+		this.currentState = state;
 	}
 
 	boolean isStanding() {
@@ -117,6 +124,8 @@ class PlayerObject extends GameObject {
 
 		if(willJump) {
 			this.setSpeedY(-(sqrt(2 * (GRAVITY / frameRate) * 150)));
+			this.visualStates[JUMP].reset();
+			this.currentState = JUMP;
 		}
 	}
 
@@ -126,11 +135,13 @@ class PlayerObject extends GameObject {
 
 	void interactWithKeyPressed(int keyCode) {
 		if(keyCode == 39) { // right arrow
+			this.isFacingLeft = false;
 			this.setSpeedX(max(5, this.getSpeedX()));
-			this.currentState = WALK;
+			if(this.currentState == STANDING) this.currentState = WALK;
 		} else if(keyCode == 37) { // left arrow
+			this.isFacingLeft = true;
 			this.setSpeedX(min(-5, this.getSpeedX()));
-			this.currentState = WALK;
+			if(this.currentState == STANDING) this.currentState = WALK;
 		} else if(keyCode == 32) { // space
 			this.jump();
 		} else if(keyCode == 81){
@@ -141,7 +152,7 @@ class PlayerObject extends GameObject {
 	void interactWithKeyReleased(int keyCode) {
 		if((keyCode == 39 || keyCode == 37)) { // left or right arrow
 			PLAYER.setSpeedX(0);
-			this.currentState = STANDING;
+			if(this.currentState == WALK) this.currentState = STANDING;
 		}
 	}
 };

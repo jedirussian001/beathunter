@@ -7,11 +7,28 @@ class LandSection extends Terrain {
 		super(pos, h, TERRAIN_WIDTH, true);
 	}
 
+	void calculatePositionThenRender(float leftScreenEdge) {
+		float startX = this.getStartingPosition() - leftScreenEdge;
+
+		this.render(startX, height - this.getHeight(), this.getWidth());
+	}
+
 	void render(float x, float y, float w) {
-		rectMode(CORNER);
-		fill(180, 0, 0);
-		noStroke();
-		rect(x, y, w, this.getHeight());
+		// rectMode(CORNER);
+		// fill(180, 0, 0);
+		// noStroke();
+		// rect(x, y, w, this.getHeight());
+
+		imageMode(CORNER);
+		for(float j = y; j < height; j += LAND_TEXTURE_HEIGHT) {
+			for(float i = x; i < x + w; i += LAND_TEXTURE_WIDTH) {
+				image(LAND_TEXTURE, i, j, LAND_TEXTURE_WIDTH, LAND_TEXTURE_HEIGHT);
+			}
+		}
+		imageMode(CENTER);
+		for(float i = x + (LAND_TEXTURE_WIDTH / 2); i < x + w; i += LAND_TEXTURE_WIDTH) {
+			image(GRASS_TEXTURE, i, y, LAND_TEXTURE_WIDTH, 20);
+		}
 	}
 
 	float interactWithObject(GameObject obj, float y) {
@@ -19,6 +36,13 @@ class LandSection extends Terrain {
 
 		if(obj == PLAYER) { // if the player touches the floor, he can jump again!
 			PLAYER.resetJumps();
+			if(PLAYER.getState() != ATTACK) {
+				if(PLAYER.getSpeedX() == 0) {
+					PLAYER.setState(STANDING);
+				} else {
+					PLAYER.setState(WALK);
+				}
+			}
 		}
 
 		return (height - this.getHeight()) - obj.centerToBottom();
@@ -30,7 +54,7 @@ class Pit extends Terrain {
 		super(pos, 0, PIT_WIDTH, false);
 	}
 
-	void calculateThenRender() {}
+	void calculatePositionThenRender(float leftScreenEdge) {}
 
 	void render(float x, float y, float w) {}
 
@@ -59,7 +83,6 @@ class Quicksand extends Terrain {
 		float spY = min(0, obj.getSpeedY()), realHeight = height - this.getHeight() - obj.centerToBottom();
 		Point objCenter = obj.getCenter();
 
-		println("spY: "+spY);
 		obj.setSpeedY(spY);
 
 		if(spY == 0) {

@@ -15,12 +15,6 @@ abstract class BackgroundLayer {
 		deltaAngleLayer = atan(deltaX / totalDistance);
 
 		this.offset -= deltaX * (deltaAngleLayer / deltaAnglePlayer);
-
-		if(this.offset >= width) {
-			this.offset -= width;
-		} else if(this.offset <= -width) {
-			this.offset += width;
-		}
 	}
 
 	abstract void render();
@@ -38,15 +32,31 @@ class ResizedImageLayer extends BackgroundLayer {
 		this.layerHeight = lHeight;
 	}
 
+	void computeOffset() {
+		super.computeOffset();
+
+		if(this.offset >= this.layerWidth) {
+			this.offset -= this.layerWidth;
+		} else if(this.offset <= -this.layerWidth) {
+			this.offset += this.layerWidth;
+		}
+	}
+
 	void render() {
 		float playerPosition = PLAYER.getXPosition() + PLAYER.getOffsetX(), 
-			stageEnd = TERRAIN_LIST[TERRAIN_LIST.length - 1].getEndPosition();
+			stageEnd = TERRAIN_LIST[TERRAIN_LIST.length - 1].getEndPosition(),
+			repetitionStart = this.offset;
 
 		if(PLAYER.getScreenXPosition() == (width / 2) && PLAYER.getSpeedX() != 0) this.computeOffset();
 
 		imageMode(CORNER);
-		if(this.offset > 0) image(this.img, this.offset - width, 0, this.layerWidth, this.layerHeight);
-		image(this.img, this.offset, 0, this.layerWidth, this.layerHeight);
-		if(this.offset < 0) image(this.img, this.offset + width, 0, this.layerWidth, this.layerHeight);
+
+		while(repetitionStart > 0) repetitionStart -= this.layerWidth;
+
+		while(repetitionStart < width) {
+			image(this.img, repetitionStart, 0, this.layerWidth, this.layerHeight);
+
+			repetitionStart += this.layerWidth;
+		}
 	}
 }

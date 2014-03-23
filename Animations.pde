@@ -6,6 +6,7 @@
 
  abstract class VisualState {
  	abstract void draw(float x, float y);
+ 	void reset() {}
  }
 
  class SingleSprite extends VisualState {
@@ -35,6 +36,10 @@
  		this.stepCounter = 0;
  	}
 
+ 	void reset() {
+ 		this.stepCounter = 0;
+ 	}
+
  	void step() {
  		stepCounter++;
     	if(stepCounter == imgs.length) {  // uses the images up to the last one
@@ -46,21 +51,5 @@
 		imageMode(CENTER);
 		image(imgs[stepCounter], x, y);
 		this.step();
-	}
-};
-
-class OneTimeAnimation extends Animation { //  extends the animation func
-	OneTimeAnimation(String imgFolder, int numImages) {
-		super(imgFolder, numImages); 
-	}
-
-	void step() {
-		if(stepCounter < imgs.length-1) {
-			stepCounter++;
-		}
-	}
-
-	void reset() {
-		stepCounter = 0;
 	}
 };
