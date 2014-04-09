@@ -5,6 +5,12 @@
 class LandSection extends Terrain {
 	LandSection(float h, float pos) {
 		super(pos, h, TERRAIN_WIDTH, true);
+
+		if(LAND_TEXTURE == null)
+			LAND_TEXTURE = loadImage("data/landscape/land.png");
+
+		if(GRASS_TEXTURE == null)
+			GRASS_TEXTURE = loadImage("data/landscape/grass.png");
 	}
 
 	void calculatePositionThenRender(float leftScreenEdge) {

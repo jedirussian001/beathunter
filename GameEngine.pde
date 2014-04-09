@@ -86,6 +86,10 @@ class GameEngine {
 				for(int j = i + 1; j < this.objCount; j++) {
 					otherObject = this.objects[j];
 
+					if(!otherObject.isEnabled()) {
+						continue;
+					}
+
 					if(currentObject.getHitbox().intersectsWith(otherObject.getHitbox())) {
 						this.collisionOccurred(currentObject, otherObject);
 
@@ -156,15 +160,77 @@ class GameEngine {
 	}
 
 	void collisionOccurred(GameObject anObject, GameObject otherObject) {
-		
+		GameObject playerOrNull = null, other = null;
+
+		if(anObject == PLAYER) {
+			playerOrNull = PLAYER;
+			other = otherObject;
+		} else if(otherObject == PLAYER) {
+			playerOrNull = PLAYER;
+			other = anObject;
+		}
+
+		if(playerOrNull != null) {
+			for(int i = 0; i < TOKENS.length; i++) {
+				if(other == TOKENS[i]) {
+					JUNGLE_SOUNDS[i].unmute();
+					TOKENS[i].disable();
+				}
+			}
+		}
 	}
 
 	void handleObjectFall(GameObject obj) {
-		if(obj == PLAYER) {
-			PLAYER.disable();
-			// call game over
-		} else {
-			obj.disable();
+		obj.disable();
+	}
+
+	void changeState(int newState) {
+		//code to be executed on 
+		this.onExitState();
+
+		CURRENT_STATE = newState;
+
+		this.onEnterState();
+	}
+
+	void onExitState() {
+		switch (CURRENT_STATE) {
+			case 0:
+				START_SCREEN_SONG.close();
+				break;
+			default:
+				//not expected
+				break;
+		}
+	}
+
+	void onEnterState() {}
+
+	void generateSounds() {
+		START_SCREEN_SONG = MINIM.loadFile("intro.mp3");
+		START_SCREEN_SONG.loop();
+
+		JUNGLE_SOUNDS = new AudioPlayer[5];
+
+		for(int i = 1; i <= JUNGLE_SOUNDS.length; i++) {
+			JUNGLE_SOUNDS[i - 1] = MINIM.loadFile("sounds/j"+i+".wav");
+			JUNGLE_SOUNDS[i - 1].mute();
+			JUNGLE_SOUNDS[i - 1].loop();
+		}
+	}
+
+	void generateTokens() {
+		TOKENS = new Token[5];
+
+		//TODO: generate tokens appropriately
+		TOKENS[0] = new Token(400, 200, 50, 50);
+		TOKENS[1] = new Token(1000, 200, 50, 50);
+		TOKENS[2] = new Token(1500, 200, 50, 50);
+		TOKENS[3] = new Token(2000, 200, 50, 50);
+		TOKENS[4] = new Token(2500, 200, 50, 50);
+
+		for(int i = 0; i < TOKENS.length; i++) {
+			this.addObject(TOKENS[i]);
 		}
 	}
 }

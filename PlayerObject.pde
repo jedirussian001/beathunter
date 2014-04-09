@@ -11,6 +11,7 @@ class PlayerObject extends GameObject {
 	VisualState[] visualStates;
 	int currentState;
 	boolean isFacingLeft;
+	AudioPlayer jumpSound;
 
 	PlayerObject(float x, float y, float offX, float offY, float hitW, float hitH) {
 		super(x, y, offX, offY);
@@ -20,6 +21,8 @@ class PlayerObject extends GameObject {
 		this.visualStates[WALK] = new Animation("warrior/walk", walkingFrames);
 		this.visualStates[JUMP] = new Animation("warrior/jump", jumpingFrames);
 		this.visualStates[ATTACK] = new Animation("warrior/hit", attackFrames);
+
+		this.setupSounds();
 
 		this.currentState = STANDING;
 		this.isFacingLeft = false;
@@ -95,6 +98,7 @@ class PlayerObject extends GameObject {
 	void doMeleeAttack() {
 		this.meleeAttackStage = attackFrames;
 		this.currentState = ATTACK;
+		this.playAttackSound();
 	}
 
 	int getState() {
@@ -126,6 +130,8 @@ class PlayerObject extends GameObject {
 			this.setSpeedY(-(sqrt(2 * (GRAVITY / frameRate) * 150)));
 			this.visualStates[JUMP].reset();
 			this.currentState = JUMP;
+
+			this.playJumpSound();
 		}
 	}
 
@@ -154,5 +160,33 @@ class PlayerObject extends GameObject {
 			PLAYER.setSpeedX(0);
 			if(this.currentState == WALK) this.currentState = STANDING;
 		}
+	}
+
+	// EDIT THIS METHOD FOR THE INITIAL SETUP OF THE SOUNDS
+	// E.G. LOADING SOUND FILES ETC.
+	void setupSounds() {
+		/*
+		SETTING UP JUMPING SOUND
+		*/
+		this.jumpSound = MINIM.loadFile("jump.wav");
+
+		/*
+		SETTING UP HITTING SOUND (not yet implemented)
+		*/
+	}
+
+	/*
+	THE JUMPING SOUND GOES BELOW THIS COMMENT! ;)
+	*/
+	void playJumpSound() {
+		jumpSound.rewind();
+		jumpSound.play();
+	}
+
+	/*
+	HERE GOES THE CODE FOR PLAYING THE ATTACK SOUNDS. not yet implemented
+	*/
+	void playAttackSound() {
+
 	}
 };
